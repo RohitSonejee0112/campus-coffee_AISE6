@@ -46,4 +46,15 @@ class EventSourcedPosDataService(
 
     @Transactional
     override fun clear() = writer.clear(Pos::class, delegate::clear)
+
+    @Transactional
+    override fun revert(id: UUID, expectedVersion: Long): Pos? =
+        writer.revert(
+            Pos::class,
+            id,
+            expectedVersion,
+            delegate::getById,
+            { body -> EventJsonMapper.instance.convertValue(body, Pos::class.java) },
+            { domain, currentVersion -> domain.copy(version = currentVersion) }
+        )
 }

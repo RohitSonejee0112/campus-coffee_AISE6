@@ -60,6 +60,11 @@ class EventStore(
     fun clear(entityType: String) = eventRepository.deleteByEntityType(entityType)
 
     /**
+     * Finds all events for a given entity ID.
+     */
+    fun findByEntityId(id: String): List<EventEntity> = eventRepository.findByEntityIdOrderBySeqDesc(id)
+
+    /**
      * Whether the log already holds an event for the given domain type, so the import can skip that type.
      *
      * @param entityType the entity type label (the domain class's simple name)

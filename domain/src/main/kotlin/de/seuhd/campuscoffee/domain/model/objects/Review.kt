@@ -9,6 +9,7 @@ import java.util.UUID
  */
 data class Review(
     override val id: UUID? = null,
+    override val version: Long? = null,
     val createdAt: LocalDateTime? = null,
     val updatedAt: LocalDateTime? = null,
     val pos: Pos,

@@ -45,4 +45,15 @@ class EventSourcedReviewDataService(
 
     @Transactional
     override fun clear() = writer.clear(Review::class, delegate::clear)
+
+    @Transactional
+    override fun revert(id: UUID, expectedVersion: Long): Review? =
+        writer.revert(
+            Review::class,
+            id,
+            expectedVersion,
+            delegate::getById,
+            { body -> EventJsonMapper.instance.convertValue(body, Review::class.java) },
+            { domain, currentVersion -> domain.copy(version = currentVersion) }
+        )
 }

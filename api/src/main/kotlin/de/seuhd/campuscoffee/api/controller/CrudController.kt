@@ -73,6 +73,25 @@ abstract class CrudController<DOMAIN : DomainModel<ID>, DTO : Dto<ID>, ID : Any>
         return ResponseEntity.noContent().build()
     }
 
+    /**
+     * Reverts the last change of a resource by ID.
+     *
+     * @param id the ID of the resource to revert
+     * @param version the current version of the resource expected by the client
+     */
+    @org.springframework.web.bind.annotation.PostMapping("/{id}/revert")
+    open fun revert(
+        @org.springframework.web.bind.annotation.PathVariable id: ID,
+        @org.springframework.web.bind.annotation.RequestParam("version") version: Long
+    ): ResponseEntity<DTO> {
+        val reverted = service().revert(id, version)
+        return if (reverted == null) {
+            ResponseEntity.noContent().build()
+        } else {
+            ResponseEntity.ok(mapper().fromDomain(reverted))
+        }
+    }
+
     /** Upserts a resource: maps DTO to domain, calls the service, and maps the result back to a DTO. */
     protected fun upsert(dto: DTO): DTO = mapper().fromDomain(service().upsert(mapper().toDomain(dto)))
 

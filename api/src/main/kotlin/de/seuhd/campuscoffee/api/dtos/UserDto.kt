@@ -22,6 +22,7 @@ import java.util.UUID
  */
 data class UserDto(
     override val id: UUID? = null,
+    override val version: Long? = null,
     val createdAt: LocalDateTime? = null,
     val updatedAt: LocalDateTime? = null,
     @field:NotNull

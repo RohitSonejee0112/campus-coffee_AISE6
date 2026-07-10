@@ -25,6 +25,7 @@ private const val MAX_REVIEW_LENGTH = 5000
  */
 data class ReviewDto(
     override val id: UUID? = null,
+    override val version: Long? = null,
     val createdAt: LocalDateTime? = null,
     val updatedAt: LocalDateTime? = null,
     @field:NotNull(message = "POS ID cannot be null.")

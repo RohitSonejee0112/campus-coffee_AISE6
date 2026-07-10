@@ -55,4 +55,13 @@ interface CrudDataService<DOMAIN : DomainModel<ID>, ID> {
      * @throws DeletionConflictException if other data still references the entity
      */
     fun delete(id: ID)
+
+    /**
+     * Reverts the last recorded change of an entity.
+     *
+     * @param id the unique identifier of the entity
+     * @param expectedVersion the version the client expects the entity to be at
+     * @return the restored entity, or null if reverting caused the entity to be deleted
+     */
+    fun revert(id: ID, expectedVersion: Long): DOMAIN?
 }

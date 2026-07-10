@@ -103,6 +103,81 @@ class EventSourcedWriter(
         clearReadModel()
     }
 
+    /**
+     * Reverts the last recorded change of an entity.
+     *
+     * @param domainType the domain class of the entity
+     * @param id the unique identifier of the entity
+     * @param expectedVersion the version expected by the client
+     * @param getById loads the current state from the read model (throws NotFoundException if missing)
+     * @param deleteReadModel deletes the entity from the read model
+     * @param upsertReadModel upserts the entity to the read model
+     */
+    fun <D : DomainModel<UUID>> revert(
+        domainType: KClass<out DomainModel<*>>,
+        id: UUID,
+        expectedVersion: Long,
+        getById: (UUID) -> D,
+        deserializeBody: (Map<String, Any?>) -> D,
+        copyWithCurrentVersion: (D, Long?) -> D
+    ): D? {
+        val events = eventStore.findByEntityId(id.toString())
+        if (events.isEmpty()) {
+            throw de.seuhd.campuscoffee.domain.exceptions.NotFoundException("${domainType.simpleName} with ID '$id' not found.")
+        }
+
+        val currentEntity = try {
+            getById(id)
+        } catch (e: de.seuhd.campuscoffee.domain.exceptions.NotFoundException) {
+            null
+        }
+
+        if (currentEntity != null) {
+            if (currentEntity.version != expectedVersion) {
+                throw org.springframework.dao.OptimisticLockingFailureException(
+                    "Stale version for ${domainType.simpleName} '$id': expected $expectedVersion but was ${currentEntity.version}"
+                )
+            }
+        } else {
+            val lastEvent = events.first()
+            if (lastEvent.changeType != ChangeType.DELETE) {
+                throw de.seuhd.campuscoffee.domain.exceptions.NotFoundException("${domainType.simpleName} with ID '$id' not found.")
+            }
+            val previousEvent = events.getOrNull(1)
+            val previousVersion = previousEvent?.body?.get("version") as? Number
+            if (previousVersion != null && expectedVersion != previousVersion.toLong() && expectedVersion != previousVersion.toLong() + 1) {
+                 throw org.springframework.dao.OptimisticLockingFailureException(
+                    "Stale version for ${domainType.simpleName} '$id': deleted entity"
+                )
+            }
+        }
+
+        val lastEvent = events.first()
+        return when (lastEvent.changeType) {
+            ChangeType.INSERT -> {
+                val deleteEvent = eventStore.appendDelete(domainType, id)
+                project(deleteEvent)
+                null
+            }
+            ChangeType.UPDATE -> {
+                val previousEvent = events[1]
+                val previousDomain = deserializeBody(previousEvent.body!!)
+                val restoredDomainWithCurrentVersion = copyWithCurrentVersion(previousDomain, currentEntity?.version)
+                val updateEvent = eventStore.appendUpdate(restoredDomainWithCurrentVersion)
+                project(updateEvent)
+                getById(id)
+            }
+            ChangeType.DELETE -> {
+                val previousEvent = events[1]
+                val previousDomain = deserializeBody(previousEvent.body!!)
+                val insertEvent = eventStore.appendInsert(previousDomain)
+                project(insertEvent)
+                getById(id)
+            }
+            null -> throw IllegalStateException("Event has no changeType")
+        }
+    }
+
     /** Projects an appended event onto the read tables via the [ReadModelProjector]. */
     private fun project(event: EventEntity) = projector.apply(event)
 

@@ -56,6 +56,19 @@ class ReviewDataServiceImpl(
             .findAllByPosAndAuthor(posEntityMapper.toEntity(pos), userEntityMapper.toEntity(author))
             .map { mapper.fromEntity(it) }
 
+    override fun delete(id: UUID) {
+        if (!reviewRepository.existsById(id)) {
+            throw de.seuhd.campuscoffee.domain.exceptions.NotFoundException("Review with ID '$id' not found.")
+        }
+        // review rows are leaves, so they can never be referenced by other rows; no constraint violation
+        reviewRepository.deleteById(id)
+        reviewRepository.flush()
+    }
+
+    override fun revert(id: UUID, expectedVersion: Long): Review? {
+        throw UnsupportedOperationException("Revert is only supported in event-sourcing mode.")
+    }
+
     companion object {
         /**
          * Spring bean name of this relational adapter. The event-sourcing decorator qualifies on it to wrap

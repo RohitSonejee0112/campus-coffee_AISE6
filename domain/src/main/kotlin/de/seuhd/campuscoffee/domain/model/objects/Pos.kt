@@ -13,6 +13,7 @@ import java.util.UUID
  */
 data class Pos(
     override val id: UUID? = null,
+    override val version: Long? = null,
     val createdAt: LocalDateTime? = null,
     val updatedAt: LocalDateTime? = null,
     val name: String,

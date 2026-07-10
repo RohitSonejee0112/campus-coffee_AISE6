@@ -46,4 +46,15 @@ class EventSourcedUserDataService(
 
     @Transactional
     override fun clear() = writer.clear(User::class, delegate::clear)
+
+    @Transactional
+    override fun revert(id: UUID, expectedVersion: Long): User? =
+        writer.revert(
+            User::class,
+            id,
+            expectedVersion,
+            delegate::getById,
+            { body -> EventJsonMapper.instance.convertValue(body, User::class.java) },
+            { domain, currentVersion -> domain.copy(version = currentVersion) }
+        )
 }
