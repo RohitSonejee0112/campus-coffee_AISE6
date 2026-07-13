@@ -89,7 +89,7 @@ rm -f "$OUTPUT"
 # Keep .git/ and the build inputs (mise.toml, gradle/libs.versions.toml, build-logic/, gradle.properties);
 # exclude generated build output, IDE files, and the mise-provisioned Gradle wrapper (this project has no
 # wrapper, so gradlew*/gradle/wrapper are IDE-generated and ignored).
-COPYFILE_DISABLE=1 zip -qr "$OUTPUT" . \
+COPYFILE_DISABLE=1 zip -qr "$OUTPUT" . .git \
     -x "*/.gradle/*"  -x ".gradle/*" \
     -x "*/.gradle"    -x ".gradle" \
     -x "*/build/*"    -x "build/*" \
