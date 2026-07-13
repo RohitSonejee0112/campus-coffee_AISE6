@@ -13,12 +13,16 @@ interface EventRepository : JpaRepository<EventEntity, UUID> {
     /**
      * Finds all events for a given entity ID, ordered by sequence number descending.
      * The entity ID is stored inside the JSONB body.
+     *
+     * @param entityId the ID of the entity to retrieve events for
      */
     @org.springframework.data.jpa.repository.Query(
         value = "SELECT * FROM events WHERE body->>'id' = :entityId ORDER BY seq DESC",
         nativeQuery = true
     )
-    fun findByEntityIdOrderBySeqDesc(@org.springframework.data.repository.query.Param("entityId") entityId: String): List<EventEntity>
+    fun findByEntityIdOrderBySeqDesc(
+        @org.springframework.data.repository.query.Param("entityId") entityId: String
+    ): List<EventEntity>
 
     /**
      * Whether the log already holds at least one event for the given domain type, so the import can skip it.

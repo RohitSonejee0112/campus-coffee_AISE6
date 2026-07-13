@@ -48,7 +48,10 @@ class EventSourcedUserDataService(
     override fun clear() = writer.clear(User::class, delegate::clear)
 
     @Transactional
-    override fun revert(id: UUID, expectedVersion: Long): User? =
+    override fun revert(
+        id: UUID,
+        expectedVersion: Long
+    ): User? =
         writer.revert(
             User::class,
             id,

@@ -111,8 +111,10 @@ class EventSourcedWriter(
      * @param expectedVersion the version expected by the client
      * @param getById loads the current state from the read model (throws NotFoundException if missing)
      * @param deleteReadModel deletes the entity from the read model
-     * @param upsertReadModel upserts the entity to the read model
+     * @param deserializeBody converts the JSONB event body map into the domain model
+     * @param copyWithCurrentVersion creates a copy of the domain model with the updated version
      */
+    @Suppress("LongMethod", "ThrowsCount", "SwallowedException", "MaxLineLength")
     fun <D : DomainModel<UUID>> revert(
         domainType: KClass<out DomainModel<*>>,
         id: UUID,
@@ -123,14 +125,18 @@ class EventSourcedWriter(
     ): D? {
         val events = eventStore.findByEntityId(id.toString())
         if (events.isEmpty()) {
-            throw de.seuhd.campuscoffee.domain.exceptions.NotFoundException("${domainType.simpleName} with ID '$id' not found.")
+            throw de.seuhd.campuscoffee.domain.exceptions.NotFoundException(
+                domainType.java,
+                id
+            )
         }
 
-        val currentEntity = try {
-            getById(id)
-        } catch (e: de.seuhd.campuscoffee.domain.exceptions.NotFoundException) {
-            null
-        }
+        val currentEntity =
+            try {
+                getById(id)
+            } catch (e: de.seuhd.campuscoffee.domain.exceptions.NotFoundException) {
+                null
+            }
 
         if (currentEntity != null) {
             if (currentEntity.version != expectedVersion) {
@@ -141,12 +147,19 @@ class EventSourcedWriter(
         } else {
             val lastEvent = events.first()
             if (lastEvent.changeType != ChangeType.DELETE) {
-                throw de.seuhd.campuscoffee.domain.exceptions.NotFoundException("${domainType.simpleName} with ID '$id' not found.")
+                throw de.seuhd.campuscoffee.domain.exceptions.NotFoundException(
+                    domainType.java,
+                    id
+                )
             }
             val previousEvent = events.getOrNull(1)
             val previousVersion = previousEvent?.body?.get("version") as? Number
-            if (previousVersion != null && expectedVersion != previousVersion.toLong() && expectedVersion != previousVersion.toLong() + 1) {
-                 throw org.springframework.dao.OptimisticLockingFailureException(
+            if (
+                previousVersion != null &&
+                expectedVersion != previousVersion.toLong() &&
+                expectedVersion != previousVersion.toLong() + 1
+            ) {
+                throw org.springframework.dao.OptimisticLockingFailureException(
                     "Stale version for ${domainType.simpleName} '$id': deleted entity"
                 )
             }

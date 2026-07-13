@@ -135,13 +135,13 @@ object SystemTestUtils {
     fun <T> assertEqualsIgnoringTimestamps(
         actual: T,
         expected: T
-    ) = assertEqualsIgnoringFields(actual, expected, "createdAt", "updatedAt", *secretFields)
+    ) = assertEqualsIgnoringFields(actual, expected, "createdAt", "updatedAt", "version", *secretFields)
 
     /** Asserts two objects are equal, ignoring the id, timestamp (and user secret) fields. */
     fun <T> assertEqualsIgnoringIdAndTimestamps(
         actual: T,
         expected: T
-    ) = assertEqualsIgnoringFields(actual, expected, "id", "createdAt", "updatedAt", *secretFields)
+    ) = assertEqualsIgnoringFields(actual, expected, "id", "createdAt", "updatedAt", "version", *secretFields)
 
     /** Asserts two lists contain the same elements (any order), ignoring the given fields per element. */
     fun <T> assertEqualsIgnoringFields(

@@ -47,7 +47,10 @@ class EventSourcedReviewDataService(
     override fun clear() = writer.clear(Review::class, delegate::clear)
 
     @Transactional
-    override fun revert(id: UUID, expectedVersion: Long): Review? =
+    override fun revert(
+        id: UUID,
+        expectedVersion: Long
+    ): Review? =
         writer.revert(
             Review::class,
             id,

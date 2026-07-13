@@ -61,6 +61,8 @@ class EventStore(
 
     /**
      * Finds all events for a given entity ID.
+     *
+     * @param id the ID of the entity to retrieve events for
      */
     fun findByEntityId(id: String): List<EventEntity> = eventRepository.findByEntityIdOrderBySeqDesc(id)
 

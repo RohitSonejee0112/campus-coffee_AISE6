@@ -63,5 +63,8 @@ interface CrudDataService<DOMAIN : DomainModel<ID>, ID> {
      * @param expectedVersion the version the client expects the entity to be at
      * @return the restored entity, or null if reverting caused the entity to be deleted
      */
-    fun revert(id: ID, expectedVersion: Long): DOMAIN?
+    fun revert(
+        id: ID,
+        expectedVersion: Long
+    ): DOMAIN?
 }

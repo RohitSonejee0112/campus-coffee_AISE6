@@ -62,5 +62,8 @@ interface CrudService<DOMAIN : DomainModel<ID>, ID> {
      * @param expectedVersion the version the client expects the object to be at
      * @return the restored object, or null if reverting caused the object to be deleted
      */
-    fun revert(id: ID, expectedVersion: Long): DOMAIN?
+    fun revert(
+        id: ID,
+        expectedVersion: Long
+    ): DOMAIN?
 }

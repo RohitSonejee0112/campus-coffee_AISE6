@@ -44,6 +44,11 @@ class UserDataServiceImpl(
     override fun getByLoginName(loginName: String): User =
         findByFieldOrThrow({ repository.findByLoginName(loginName) }, UserEntity.LOGIN_NAME_COLUMN, loginName)
 
+    override fun revert(
+        id: UUID,
+        expectedVersion: Long
+    ): User? = throw UnsupportedOperationException("Revert is only supported in event-sourcing mode.")
+
     companion object {
         /**
          * Spring bean name of this relational adapter. The event-sourcing decorator qualifies on it to wrap

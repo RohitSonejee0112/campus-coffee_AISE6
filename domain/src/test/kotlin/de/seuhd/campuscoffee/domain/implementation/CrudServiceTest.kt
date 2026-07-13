@@ -24,6 +24,7 @@ class CrudServiceTest {
     /** Test-only domain model. */
     private data class TestDomain(
         override val id: Long?,
+        override val version: Long? = null,
         val name: String
     ) : DomainModel<Long>
 
@@ -42,7 +43,7 @@ class CrudServiceTest {
 
     @Test
     fun `upsert propagates a DuplicationException from the data service`() {
-        val domainObject = TestDomain(null, "duplicate")
+        val domainObject = TestDomain(id = null, name = "duplicate")
         whenever(dataService.upsert(domainObject))
             .thenThrow(DuplicationException(TestDomain::class.java, "name", "duplicate"))
 

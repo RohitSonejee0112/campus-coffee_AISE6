@@ -6,6 +6,7 @@ import de.seuhd.campuscoffee.data.mapper.ReviewEntityMapper
 import de.seuhd.campuscoffee.data.mapper.UserEntityMapper
 import de.seuhd.campuscoffee.data.persistence.entities.ReviewEntity
 import de.seuhd.campuscoffee.data.persistence.repositories.ReviewRepository
+import de.seuhd.campuscoffee.domain.exceptions.NotFoundException
 import de.seuhd.campuscoffee.domain.model.objects.Pos
 import de.seuhd.campuscoffee.domain.model.objects.Review
 import de.seuhd.campuscoffee.domain.model.objects.User
@@ -57,17 +58,18 @@ class ReviewDataServiceImpl(
             .map { mapper.fromEntity(it) }
 
     override fun delete(id: UUID) {
-        if (!reviewRepository.existsById(id)) {
-            throw de.seuhd.campuscoffee.domain.exceptions.NotFoundException("Review with ID '$id' not found.")
+        if (!repository.existsById(id)) {
+            throw NotFoundException(Review::class.java, id)
         }
         // review rows are leaves, so they can never be referenced by other rows; no constraint violation
-        reviewRepository.deleteById(id)
-        reviewRepository.flush()
+        repository.deleteById(id)
+        repository.flush()
     }
 
-    override fun revert(id: UUID, expectedVersion: Long): Review? {
-        throw UnsupportedOperationException("Revert is only supported in event-sourcing mode.")
-    }
+    override fun revert(
+        id: UUID,
+        expectedVersion: Long
+    ): Review? = throw UnsupportedOperationException("Revert is only supported in event-sourcing mode.")
 
     companion object {
         /**

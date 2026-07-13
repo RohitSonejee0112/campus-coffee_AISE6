@@ -36,6 +36,11 @@ class PosDataServiceImpl(
      */
     override fun getByName(name: String): Pos = findByFieldOrThrow({ repository.findByName(name) }, "name", name)
 
+    override fun revert(
+        id: UUID,
+        expectedVersion: Long
+    ): Pos? = throw UnsupportedOperationException("Revert is only supported in event-sourcing mode.")
+
     companion object {
         /**
          * Spring bean name of this relational adapter. The event-sourcing decorator qualifies on it to wrap

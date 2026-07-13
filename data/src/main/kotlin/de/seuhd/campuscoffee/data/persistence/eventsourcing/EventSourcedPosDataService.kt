@@ -48,7 +48,10 @@ class EventSourcedPosDataService(
     override fun clear() = writer.clear(Pos::class, delegate::clear)
 
     @Transactional
-    override fun revert(id: UUID, expectedVersion: Long): Pos? =
+    override fun revert(
+        id: UUID,
+        expectedVersion: Long
+    ): Pos? =
         writer.revert(
             Pos::class,
             id,
