@@ -79,6 +79,7 @@ abstract class CrudController<DOMAIN : DomainModel<ID>, DTO : Dto<ID>, ID : Any>
      * @param id the ID of the resource to revert
      * @param version the current version of the resource expected by the client
      */
+    @io.swagger.v3.oas.annotations.Operation(summary = "Revert the last change of a resource")
     @org.springframework.web.bind.annotation.PostMapping("/{id}/revert")
     open fun revert(
         @org.springframework.web.bind.annotation.PathVariable id: ID,
